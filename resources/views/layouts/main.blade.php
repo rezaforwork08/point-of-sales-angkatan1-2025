@@ -32,6 +32,7 @@
     <!-- Template Main CSS File -->
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- =======================================================
   * Template Name: NiceAdmin
   * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
@@ -99,8 +100,71 @@
 
     <!-- Template Main JS File -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery-3.7.1.min.js') }}"></script>
 
     @include('sweetalert::alert', ['cdn' => 'https://cdn.jsdelivr.net/npm/sweetalert2@9'])
+
+    <script>
+        // #category_id, document.getElementById('category_id'), document.querySelector('#id')
+        // event,
+        // let category = document.getElementById('category_id');
+        // category.addEventListener(function() {
+
+        // });
+
+        $('#category_id').change(function() {
+            let cat_id = $(this).val(),
+                option = `<option value="">Select One</option>`;
+            $.ajax({
+                url: '/get-product/' + cat_id,
+                type: 'GET',
+                dataType: 'json',
+                success: function(resp) {
+                    $.each(resp.data, function(index, value) {
+                        option +=
+                            `<option  value="${value.id}" data-price="${value.product_price}" data-img="${value.product_photo}">${value.product_name}</option>`;
+                    });
+                    console.log(option)
+                    $('#product_id').html(option);
+                }
+            });
+
+        });
+
+        $(".add-row").click(function() {
+            let tbody = $('tbody');
+            let selectedOption = $('#product_id').find('option:selected');
+            let namaProduk = selectedOption.text()
+            let photoProduct = selectedOption.data('img');
+            let productPrice = selectedOption.data('price');
+
+            if ($('#category_id').val() == "") {
+                alert('Category required');
+                return false;
+            }
+
+            if ($('#product_id').val() == "") {
+                alert('Product required');
+                return false;
+            }
+
+            let newRow = "<tr>";
+            newRow += `<td><img src="${photoProduct}" alt="Ini gambar"></td>`
+            newRow += `<td>${namaProduk}</td>`
+            newRow += `<td><input type='number' name='qty[]'></td>`
+            newRow += `<td>${productPrice}</td>`
+            newRow += "</tr>";
+
+            tbody.append(newRow);
+
+            clearAll();
+        });
+
+        function clearAll() {
+            $('#category_id').val("");
+            $('#product_id').val("");
+        }
+    </script>
 
 </body>
 

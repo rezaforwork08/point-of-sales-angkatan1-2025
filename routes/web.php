@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,4 +24,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('dashboard', DashboardController::class);
     Route::resource('categories', CategoriesController::class);
     Route::resource('product', ProductController::class);
+    Route::resource('pos', TransactionController::class);
+
+    Route::get('get-product/{id}', [TransactionController::class, 'getProduct']);
 });
