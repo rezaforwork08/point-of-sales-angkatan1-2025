@@ -112,6 +112,17 @@
 
         // });
 
+        function formatRupiah(number) {
+
+            const formatted = number.toLocaleString("id", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            });
+
+            return formatted;
+
+        }
+
         $('#category_id').change(function() {
             let cat_id = $(this).val(),
                 option = `<option value="">Select One</option>`;
@@ -132,11 +143,14 @@
         });
 
         $(".add-row").click(function() {
+
+
             let tbody = $('tbody');
             let selectedOption = $('#product_id').find('option:selected');
             let namaProduk = selectedOption.text()
+            let productId = selectedOption.val()
             let photoProduct = selectedOption.data('img');
-            let productPrice = selectedOption.data('price');
+            let productPrice = parseInt(selectedOption.data('price')) || 0;
 
             if ($('#category_id').val() == "") {
                 alert('Category required');
@@ -149,16 +163,49 @@
             }
 
             let newRow = "<tr>";
-            newRow += `<td><img src="${photoProduct}" alt="Ini gambar"></td>`
-            newRow += `<td>${namaProduk}</td>`
-            newRow += `<td><input type='number' name='qty[]'></td>`
-            newRow += `<td>${productPrice}</td>`
+            newRow += `<td><img src="{{ asset('storage/') }}/${photoProduct}" alt="Ini gambar" width="100"></td>`
+            newRow += `<td>${namaProduk} <input type='hidden' name='product_id[]' value='${productId}'></td>`
+            newRow += `<td width='110px'><input value='1' type='number' name='qty[]' class='qty form-control'></td>`
+            newRow +=
+                `<td><input type='hidden' name='order_price[]' value='${productPrice}'><span class='price' data-price=${productPrice}>${formatRupiah(productPrice)}</span></td>`
+            newRow +=
+                `<td><input type='hidden' class='subtotal_input' name='order_subtotal[]' value='${productPrice}'><span class='subtotal'>${formatRupiah(productPrice)}</span></td>`
             newRow += "</tr>";
 
             tbody.append(newRow);
 
+            calculateSubTotal();
+
+
             clearAll();
+
+            $('.qty').off().on('input', function() {
+                let row = $(this).closest('tr');
+                let qty = parseInt($(this).val()) || 0;
+                let price = parseInt(row.find('.price').data('price')) || 0;
+                let total = qty * price;
+                row.find('.subtotal').text(formatRupiah(total)); //NaN
+                row.find('.subtotal_input').val(formatRupiah(total)); //NaN
+
+                calculateSubTotal();
+            })
         });
+
+        function calculateSubTotal() {
+            let grandtotal = 0;
+            $('.subtotal').each(function() {
+                let total = parseInt($(this).text().replace(/\./g, ''));
+                grandtotal += total;
+                console.log("total", total);
+
+
+            });
+
+            $('.grandtotal').text(formatRupiah(grandtotal));
+            $('input[name="grandtotal"]').val(grandtotal);
+        }
+
+
 
         function clearAll() {
             $('#category_id').val("");
